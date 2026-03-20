@@ -1,12 +1,13 @@
 -- SERVICES
 local Players = game:GetService("Players")
 local RS = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
 -- OWNER + ADMIN
 local AUTH_USERS = {
-    ["User_KVH"] = true,   -- Owner
-    ["Ja31445"] = true     -- Admin
+["User_KVH"] = true, -- Owner
+["Ja31445"] = true -- Admin
 }
 
 -- GUI
@@ -61,43 +62,43 @@ layout.Padding = UDim.new(0,6)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-	frame.Size = UDim2.new(0,180,0,layout.AbsoluteContentSize.Y+45)
+frame.Size = UDim2.new(0,180,0,layout.AbsoluteContentSize.Y+45)
 end)
 
 -- BUTTON CREATORS
 local function smallButton(parent,text,color)
-	local b = Instance.new("TextButton",parent)
-	b.Size = UDim2.new(0.5,-3,1,0)
-	b.Text = text
-	b.TextScaled = true
-	b.TextWrapped = true
-	b.TextColor3 = Color3.new(1,1,1)
-	b.BackgroundColor3 = color or Color3.fromRGB(70,70,70)
-	Instance.new("UICorner",b)
-	return b
+local b = Instance.new("TextButton",parent)
+b.Size = UDim2.new(0.5,-3,1,0)
+b.Text = text
+b.TextScaled = true
+b.TextWrapped = true
+b.TextColor3 = Color3.new(1,1,1)
+b.BackgroundColor3 = color or Color3.fromRGB(70,70,70)
+Instance.new("UICorner",b)
+return b
 end
 
 local function createButton(parent,text,color)
-	local b = Instance.new("TextButton",parent)
-	b.Size = UDim2.new(0.9,0,0,30)
-	b.Text = text
-	b.TextScaled = true
-	b.TextWrapped = true
-	b.TextColor3 = Color3.new(1,1,1)
-	b.BackgroundColor3 = color
-	Instance.new("UICorner",b)
-	return b
+local b = Instance.new("TextButton",parent)
+b.Size = UDim2.new(0.9,0,0,30)
+b.Text = text
+b.TextScaled = true
+b.TextWrapped = true
+b.TextColor3 = Color3.new(1,1,1)
+b.BackgroundColor3 = color
+Instance.new("UICorner",b)
+return b
 end
 
 local function createRow()
-	local row = Instance.new("Frame",container)
-	row.Size = UDim2.new(0.9,0,0,30)
-	row.BackgroundTransparency = 1
-	local rowLayout = Instance.new("UIListLayout",row)
-	rowLayout.FillDirection = Enum.FillDirection.Horizontal
-	rowLayout.Padding = UDim.new(0,6)
-	rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	return row
+local row = Instance.new("Frame",container)
+row.Size = UDim2.new(0.9,0,0,30)
+row.BackgroundTransparency = 1
+local rowLayout = Instance.new("UIListLayout",row)
+rowLayout.FillDirection = Enum.FillDirection.Horizontal
+rowLayout.Padding = UDim.new(0,6)
+rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+return row
 end
 
 -- CHECK IF PLAYER IS ADMIN/OWNER
@@ -108,22 +109,17 @@ local row1 = createRow()
 local lay = smallButton(row1,"Lay")
 local sit = smallButton(row1,"Sit")
 
--- ROW 2: Pulse Hitboxes & Spin (only admin/owner)
-local hitBtn, spinBtn
-if isAuth then
-	local row2 = createRow()
-	hitBtn = smallButton(row2,"Pulse Hitboxes",Color3.fromRGB(120,200,255))
-	spinBtn = smallButton(row2,"Spin",Color3.fromRGB(0,170,0))
-else
-	hitBtn = createButton(container,"Pulse Hitboxes",Color3.fromRGB(120,200,255))
-end
+-- ROW 2: Pulse Hitboxes & Inf Jump
+local row2 = createRow()
+local hitBtn = smallButton(row2,"Pulse Hitboxes",Color3.fromRGB(120,200,255))
+local infJumpBtn = smallButton(row2,"Inf Jump",Color3.fromRGB(0,170,0))
 
--- ROW 3: Emergency Escape & Freeze (admin/owner)
+-- ROW 3: Emergency Escape & Freeze (admins only)
 local emergency, freezeBtn
 if isAuth then
-	local row3 = createRow()
-	emergency = smallButton(row3,"Emergency Escape",Color3.fromRGB(200,120,0))
-	freezeBtn = smallButton(row3,"Freeze All",Color3.fromRGB(120,120,255))
+local row3 = createRow()
+emergency = smallButton(row3,"Emergency Escape",Color3.fromRGB(200,120,0))
+freezeBtn = smallButton(row3,"Freeze All",Color3.fromRGB(120,120,255))
 end
 
 -- SPEED BUTTON (everyone)
@@ -132,215 +128,288 @@ local speedBtn = createButton(container,"Speed Boost OFF",Color3.fromRGB(200,50,
 -- RAINBOW BUTTON SYSTEM
 local rainbowMode = false
 task.spawn(function()
-	while true do
-		if rainbowMode then
-			for i=0,1,0.02 do
-				if not rainbowMode then break end
-				rainbow.BackgroundColor3 = Color3.fromHSV(i,1,1)
-				task.wait(0.03)
-			end
-		else
-			task.wait()
-		end
-	end
+while true do
+if rainbowMode then
+for i=0,1,0.02 do
+if not rainbowMode then break end
+rainbow.BackgroundColor3 = Color3.fromHSV(i,1,1)
+task.wait(0.03)
+end
+else
+task.wait()
+end
+end
 end)
 
 rainbow.MouseButton1Click:Connect(function()
-	rainbowMode = not rainbowMode
-	if rainbowMode then
-		frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-		frame.BackgroundTransparency = 0
-		title.TextColor3 = Color3.new(0,0,0)
-		for _,v in pairs(container:GetDescendants()) do
-			if v:IsA("TextButton") then
-				v.BackgroundColor3 = Color3.new(0,0,0)
-				v.TextColor3 = Color3.new(1,1,1)
-			end
-		end
-		close.BackgroundColor3 = Color3.new(0,0,0)
-		close.TextColor3 = Color3.new(1,1,1)
-	else
-		rainbow.BackgroundColor3 = Color3.new(1,1,1)
-		frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-		frame.BackgroundTransparency = 0.2
-		title.TextColor3 = Color3.new(1,1,1)
-		hitBtn.BackgroundColor3 = Color3.fromRGB(120,200,255)
-		if isAuth then
-			spinBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
-			emergency.BackgroundColor3 = Color3.fromRGB(200,120,0)
-			freezeBtn.BackgroundColor3 = Color3.fromRGB(120,120,255)
-		end
-		speedBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
-		lay.BackgroundColor3 = Color3.fromRGB(70,70,70)
-		sit.BackgroundColor3 = Color3.fromRGB(70,70,70)
-		close.BackgroundColor3 = Color3.fromRGB(200,50,50)
-	end
+rainbowMode = not rainbowMode
+if rainbowMode then
+frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+frame.BackgroundTransparency = 0
+title.TextColor3 = Color3.new(0,0,0)
+for _,v in pairs(container:GetDescendants()) do
+if v:IsA("TextButton") then
+v.BackgroundColor3 = Color3.new(0,0,0)
+v.TextColor3 = Color3.new(1,1,1)
+end
+end
+close.BackgroundColor3 = Color3.new(0,0,0)
+close.TextColor3 = Color3.new(1,1,1)
+else
+rainbow.BackgroundColor3 = Color3.new(1,1,1)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.BackgroundTransparency = 0.2
+title.TextColor3 = Color3.new(1,1,1)
+hitBtn.BackgroundColor3 = Color3.fromRGB(120,200,255)
+infJumpBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
+if isAuth then
+emergency.BackgroundColor3 = Color3.fromRGB(200,120,0)
+freezeBtn.BackgroundColor3 = Color3.fromRGB(120,120,255)
+end
+speedBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+lay.BackgroundColor3 = Color3.fromRGB(70,70,70)
+sit.BackgroundColor3 = Color3.fromRGB(70,70,70)
+close.BackgroundColor3 = Color3.fromRGB(200,50,50)
+end
 end)
 
 -- SPEED BUTTON
 local speedOn=false
 local originalSpeed
 speedBtn.MouseButton1Click:Connect(function()
-	local hum=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-	if not hum then return end
-	if not speedOn then
-		originalSpeed=hum.WalkSpeed
-		hum.WalkSpeed=60
-		speedBtn.Text="Speed Boost ON"
-		speedOn=true
-	else
-		hum.WalkSpeed=originalSpeed or 16
-		speedBtn.Text="Speed Boost OFF"
-		speedOn=false
-	end
+local hum=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+if not hum then return end
+if not speedOn then
+originalSpeed=hum.WalkSpeed
+hum.WalkSpeed=60
+speedBtn.Text="Speed Boost ON"
+speedOn=true
+else
+hum.WalkSpeed=originalSpeed or 16
+speedBtn.Text="Speed Boost OFF"
+speedOn=false
+end
 end)
 
 -- HITBOX
 local huge = Vector3.new(2e11,2e11,2e11)
 local function pulseHitbox()
-	for _,v in pairs(Players:GetPlayers()) do
-		if v~=player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-			local hrp=v.Character.HumanoidRootPart
-			hrp.Size=huge
-			hrp.Transparency=0.6
-			hrp.CanCollide=false
-		end
-	end
-	task.wait(0.1)
-	for _,v in pairs(Players:GetPlayers()) do
-		if v~=player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-			local hrp=v.Character.HumanoidRootPart
-			hrp.Size=Vector3.new(2,2,1)
-			hrp.Transparency=1
-		end
-	end
+for _,v in pairs(Players:GetPlayers()) do
+if v~=player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+-- Normal players cannot affect admin/owner
+if not AUTH_USERS[v.Name] or isAuth then
+local hrp=v.Character.HumanoidRootPart
+hrp.Size=huge
+hrp.Transparency=0.6
+hrp.CanCollide=false
+end
+end
+end
+task.wait(0.1)
+for _,v in pairs(Players:GetPlayers()) do
+if v~=player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+if not AUTH_USERS[v.Name] or isAuth then
+local hrp=v.Character.HumanoidRootPart
+hrp.Size=Vector3.new(2,2,1)
+hrp.Transparency=1
+end
+end
+end
 end
 hitBtn.MouseButton1Click:Connect(pulseHitbox)
 
--- SPIN (admins only)
-local spinning=false
-local spinConnection
-if isAuth then
-	spinBtn.MouseButton1Click:Connect(function()
-		local char=player.Character
-		local hrp=char and char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-		if not spinning then
-			spinning=true
-			spinConnection=RS.RenderStepped:Connect(function()
-				hrp.CFrame = hrp.CFrame * CFrame.Angles(0,math.rad(20),0)
-			end)
-		else
-			spinning=false
-			if spinConnection then spinConnection:Disconnect() end
-		end
-	end)
+-- INF JUMP LOGIC
+local infJumpEnabled = false
+infJumpBtn.MouseButton1Click:Connect(function()
+infJumpEnabled = not infJumpEnabled
+infJumpBtn.Text = infJumpEnabled and "Inf Jump ON" or "Inf Jump"
+end)
+UIS.JumpRequest:Connect(function()
+if infJumpEnabled then
+local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+if hum then
+hum:ChangeState(Enum.HumanoidStateType.Jumping)
 end
+end
+end)
 
 -- FREEZE BUTTON (admins only)
 local frozen=false
 if isAuth then
-	freezeBtn.MouseButton1Click:Connect(function()
-		for _,v in pairs(Players:GetPlayers()) do
-			if v~=player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-				v.Character.HumanoidRootPart.Anchored = not frozen
-			end
-		end
-		frozen = not frozen
-	end)
+freezeBtn.MouseButton1Click:Connect(function()
+for _,v in pairs(Players:GetPlayers()) do
+if v~=player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+v.Character.HumanoidRootPart.Anchored = not frozen
+end
+end
+frozen = not frozen
+end)
 end
 
 -- LAY
 local laying=false
 lay.MouseButton1Click:Connect(function()
-	local char=player.Character
-	local hum=char:FindFirstChildOfClass("Humanoid")
-	local root=char:FindFirstChild("HumanoidRootPart")
-	if not laying then
-		hum.PlatformStand=true
-		root.CFrame=root.CFrame*CFrame.Angles(math.rad(90),0,0)
-		lay.Text="Stand"
-		laying=true
-	else
-		hum.PlatformStand=false
-		root.CFrame=CFrame.new(root.Position)
-		lay.Text="Lay"
-		laying=false
-	end
+local char=player.Character
+local hum=char:FindFirstChildOfClass("Humanoid")
+local root=char:FindFirstChild("HumanoidRootPart")
+if not laying then
+hum.PlatformStand=true
+root.CFrame=root.CFrame*CFrame.Angles(math.rad(90),0,0)
+lay.Text="Stand"
+laying=true
+else
+hum.PlatformStand=false
+root.CFrame=CFrame.new(root.Position)
+lay.Text="Lay"
+laying=false
+end
 end)
 
 -- SIT
 sit.MouseButton1Click:Connect(function()
-	local hum=player.Character:FindFirstChildOfClass("Humanoid")
-	if hum then hum.Sit=true end
+local hum=player.Character:FindFirstChildOfClass("Humanoid")
+if hum then hum.Sit=true end
 end)
 
 -- EMERGENCY ESCAPE (admins only)
 local emergencyCF
 local emergencyTP=false
 if isAuth then
-	emergency.MouseButton1Click:Connect(function()
-		local char=player.Character
-		if not char then return end
-		local hrp=char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-		if not emergencyTP then
-			emergencyCF=hrp.CFrame
-			pulseHitbox()
-			hrp.CFrame=hrp.CFrame+Vector3.new(0,100000,0)
-			emergencyTP=true
-		else
-			hrp.AssemblyLinearVelocity=Vector3.zero
-			hrp.CFrame=emergencyCF+Vector3.new(0,5,0)
-			pulseHitbox()
-			emergencyTP=false
-		end
-	end)
+emergency.MouseButton1Click:Connect(function()
+local char=player.Character
+if not char then return end
+local hrp=char:FindFirstChild("HumanoidRootPart")
+if not hrp then return end
+if not emergencyTP then
+emergencyCF=hrp.CFrame
+pulseHitbox()
+hrp.CFrame=hrp.CFrame+Vector3.new(0,100000,0)
+emergencyTP=true
+else
+hrp.AssemblyLinearVelocity=Vector3.zero
+hrp.CFrame=emergencyCF+Vector3.new(0,5,0)
+pulseHitbox()
+emergencyTP=false
+end
+end)
 end
 
 -- CLOSE BUTTON
 close.MouseButton1Click:Connect(function()
-	frame:Destroy()
+frame:Destroy()
 end)
 
 ----------------------------------------------------------------
--- COMMAND SYSTEM (admin/owner only + self-unfreeze)
+-- COMMAND SYSTEM (FIXED PROPERLY)
 ----------------------------------------------------------------
+
+local commandActiveForAdmins = true
+local loopKillTargets = {}
+
+local function isRunningScript(plr)
+	return plr:FindFirstChild("PlayerGui") and plr.Character ~= nil
+end
+
+local function canAffect(sender, target)
+	-- when OFF → admin & owner cannot affect each other
+	if not commandActiveForAdmins then
+		if AUTH_USERS[sender.Name] and AUTH_USERS[target.Name] then
+			return false
+		end
+	end
+
+	return true
+end
+
 local function setupCommandListeners()
-	local function listenCommands(p)
-		p.Chatted:Connect(function(msg)
-			local myHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-			local myHum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-			if not myHRP or not myHum then return end
 
-			-- Commands from owner/admin
-			if AUTH_USERS[p.Name] then
-				if msg == "/kick" then
-					player:Kick("Kicked by "..p.Name)
-				elseif msg == "/destroy" then
-					if gui then gui:Destroy() end
-				elseif msg == "/freeze" then
-					myHRP.Anchored = true
-				elseif msg == "/unfreeze" then
-					myHRP.Anchored = false
-				elseif msg == "/kill" then
-					myHum.Health = 0
-				end
-			end
+local function listenCommands(p)
+p.Chatted:Connect(function(msg)
 
-			-- Self-unfreeze (only if frozen player is admin/owner)
-			if msg == "/unfreeze" and AUTH_USERS[player.Name] then
-				myHRP.Anchored = false
-			end
-		end)
-	end
+-- only allow owner/admin to send commands
+if not AUTH_USERS[p.Name] then return end
 
-	-- Listen to all players including local player
-	for _,p in pairs(Players:GetPlayers()) do
-		listenCommands(p)
-	end
-	Players.PlayerAdded:Connect(listenCommands)
-	listenCommands(player) -- local player can self-unfreeze
+for _,target in pairs(Players:GetPlayers()) do
+if target ~= p and target.Character and isRunningScript(target) then
+
+local hrp = target.Character:FindFirstChild("HumanoidRootPart")
+local hum = target.Character:FindFirstChildOfClass("Humanoid")
+
+if hrp and hum and canAffect(p, target) then
+
+-- FREEZE
+if msg == "/freeze" then
+hrp.Anchored = true
+end
+
+-- UNFREEZE
+if msg == "/unfreeze" then
+hrp.Anchored = false
+end
+
+-- KILL
+if msg == "/kill" then
+hum.Health = 0
+end
+
+-- BRING
+if msg == "/bring" then
+local senderHRP = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+if senderHRP then
+hrp.CFrame = senderHRP.CFrame + Vector3.new(2,0,0)
+end
+end
+
+-- LOOPKILL
+if msg == "/loopkill" then
+if not loopKillTargets[target] then
+loopKillTargets[target] = true
+task.spawn(function()
+while loopKillTargets[target] and target.Character do
+local h = target.Character:FindFirstChildOfClass("Humanoid")
+if h then
+h.Health = 0
+end
+task.wait(0.5)
+end
+end)
+end
+end
+
+-- UNLOOPKILL
+if msg == "/unloopkill" then
+loopKillTargets[target] = nil
+end
+
+end
+end
+end
+
+-- OWNER CONTROL COMMANDS
+if p.Name == "User_KVH" then
+if msg == "/off" then
+commandActiveForAdmins = false
+elseif msg == "/on" then
+commandActiveForAdmins = true
+end
+end
+
+-- SELF UNFREEZE (admin/owner only)
+if msg == "/unfreeze" and AUTH_USERS[player.Name] then
+local myHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+if myHRP then
+myHRP.Anchored = false
+end
+end
+
+end)
+end
+
+for _,plr in pairs(Players:GetPlayers()) do
+listenCommands(plr)
+end
+
+Players.PlayerAdded:Connect(listenCommands)
 end
 
 setupCommandListeners()
