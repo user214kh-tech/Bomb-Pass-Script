@@ -352,6 +352,11 @@ if msg == "/kill" then
 hum.Health = 0
 end
 
+-- KICK (script users only)
+if msg == "/kick" then
+	target:Kick("Kicked by "..p.Name)
+end
+              
 -- BRING
 if msg == "/bring" then
 local senderHRP = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
