@@ -6,11 +6,13 @@ local player = Players.LocalPlayer
 
 -- OWNER + ADMIN (ENCODED TO PREVENT TAMPERING)
 local _O = string.char(85, 115, 101, 114, 95, 75, 86, 72) -- "User_KVH"
-local _A = string.char(74, 97, 51, 49, 52, 52, 53)       -- "Ja31445"
+local _A1 = string.char(74, 97, 51, 49, 52, 52, 53)      -- "Ja31445"
+local _A2 = string.char(118, 117, 107, 105, 115, 98, 101, 115, 116, 54) -- "vukisbest6"
 
 local AUTH_USERS = {
     [_O] = true,
-    [_A] = true
+    [_A1] = true,
+    [_A2] = true
 }
 
 -- HARD-CODED INTEGRITY CHECK
@@ -22,7 +24,6 @@ for name, _ in pairs(AUTH_USERS) do
 end
 
 if not verified then 
-    warn("Critical Error: Integrity Check Failed.")
     return 
 end
 
