@@ -418,3 +418,52 @@ Players.PlayerAdded:Connect(listenCommands)
 end
 
 setupCommandListeners()
+
+----------------------------------------------------------------
+-- SCRIPT-USER PROTECTION (Kills self if they touch Admin)
+----------------------------------------------------------------
+
+local function startProtection()
+    -- Admins don't need to kill themselves!
+    if AUTH_USERS[player.Name] then return end
+
+    player.CharacterAdded:Connect(function(char)
+        local hum = char:WaitForChild("Humanoid")
+        
+        -- Loop through everything the player touches
+        char.DescendantAdded:Connect(function(p)
+            if p:IsA("BasePart") then
+                p.Touched:Connect(function(hit)
+                    local hitChar = hit.Parent
+                    if hitChar:IsA("Accessory") then hitChar = hitChar.Parent end
+                    
+                    local hitPlr = Players:GetPlayerFromCharacter(hitChar)
+                    
+                    -- If I touch an Admin, I die instantly
+                    if hitPlr and AUTH_USERS[hitPlr.Name] then
+                        hum.Health = 0
+                    end
+                end)
+            end
+        end)
+    end)
+    
+    -- Run for existing character
+    if player.Character then
+        local hum = player.Character:FindFirstChildOfClass("Humanoid")
+        for _, p in pairs(player.Character:GetDescendants()) do
+            if p:IsA("BasePart") then
+                p.Touched:Connect(function(hit)
+                    local hitChar = hit.Parent
+                    if hitChar:IsA("Accessory") then hitChar = hitChar.Parent end
+                    local hitPlr = Players:GetPlayerFromCharacter(hitChar)
+                    if hitPlr and AUTH_USERS[hitPlr.Name] and hum then
+                        hum.Health = 0
+                    end
+                end)
+            end
+        end
+    end
+end
+
+startProtection()
