@@ -441,39 +441,30 @@ setupCommandListeners()
 ----------------------------------------------------------------
 
 local function startProtection()
+    -- Admins/Owners are immune to this "kill self" check
     if AUTH_USERS[player.Name] then return end
 
-    player.CharacterAdded:Connect(function(char)
+    local function setupTouch(char)
         local hum = char:WaitForChild("Humanoid")
-        char.DescendantAdded:Connect(function(p)
+        for _, p in pairs(char:GetDescendants()) do
             if p:IsA("BasePart") then
                 p.Touched:Connect(function(hit)
                     local hitChar = hit.Parent
                     if hitChar:IsA("Accessory") then hitChar = hitChar.Parent end
+                    
                     local hitPlr = Players:GetPlayerFromCharacter(hitChar)
+                    
+                    -- If the person I (regular user) touched is an Admin/Owner, I die.
                     if hitPlr and AUTH_USERS[hitPlr.Name] then
-                        hum.Health = 0
-                    end
-                end)
-            end
-        end)
-    end)
-    
-    if player.Character then
-        local hum = player.Character:FindFirstChildOfClass("Humanoid")
-        for _, p in pairs(player.Character:GetDescendants()) do
-            if p:IsA("BasePart") then
-                p.Touched:Connect(function(hit)
-                    local hitChar = hit.Parent
-                    if hitChar:IsA("Accessory") then hitChar = hitChar.Parent end
-                    local hitPlr = Players:GetPlayerFromCharacter(hitChar)
-                    if hitPlr and AUTH_USERS[hitPlr.Name] and hum then
                         hum.Health = 0
                     end
                 end)
             end
         end
     end
+
+    player.CharacterAdded:Connect(setupTouch)
+    if player.Character then setupTouch(player.Character) end
 end
 
 startProtection()
