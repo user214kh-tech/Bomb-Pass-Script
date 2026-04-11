@@ -4,11 +4,27 @@ local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
--- OWNER + ADMIN
+-- OWNER + ADMIN (ENCODED TO PREVENT TAMPERING)
+local _O = string.char(85, 115, 101, 114, 95, 75, 86, 72) -- "User_KVH"
+local _A = string.char(74, 97, 51, 49, 52, 52, 53)       -- "Ja31445"
+
 local AUTH_USERS = {
-["User_KVH"] = true, -- Owner
-["Ja31445"] = true -- Admin
+    [_O] = true,
+    [_A] = true
 }
+
+-- HARD-CODED INTEGRITY CHECK
+local verified = false
+for name, _ in pairs(AUTH_USERS) do
+    if name == string.char(85, 115, 101, 114, 95, 75, 86, 72) then
+        verified = true
+    end
+end
+
+if not verified then 
+    warn("Critical Error: Integrity Check Failed.")
+    return 
+end
 
 -- GUI
 local gui = Instance.new("ScreenGui", game.CoreGui)
@@ -391,7 +407,7 @@ end
 end
 
 -- OWNER CONTROL COMMANDS
-if p.Name == "User_KVH" then
+if p.Name == string.char(85, 115, 101, 114, 95, 75, 86, 72) then
 if msg == "/off" then
 commandActiveForAdmins = false
 elseif msg == "/on" then
@@ -424,22 +440,16 @@ setupCommandListeners()
 ----------------------------------------------------------------
 
 local function startProtection()
-    -- Admins don't need to kill themselves!
     if AUTH_USERS[player.Name] then return end
 
     player.CharacterAdded:Connect(function(char)
         local hum = char:WaitForChild("Humanoid")
-        
-        -- Loop through everything the player touches
         char.DescendantAdded:Connect(function(p)
             if p:IsA("BasePart") then
                 p.Touched:Connect(function(hit)
                     local hitChar = hit.Parent
                     if hitChar:IsA("Accessory") then hitChar = hitChar.Parent end
-                    
                     local hitPlr = Players:GetPlayerFromCharacter(hitChar)
-                    
-                    -- If I touch an Admin, I die instantly
                     if hitPlr and AUTH_USERS[hitPlr.Name] then
                         hum.Health = 0
                     end
@@ -448,7 +458,6 @@ local function startProtection()
         end)
     end)
     
-    -- Run for existing character
     if player.Character then
         local hum = player.Character:FindFirstChildOfClass("Humanoid")
         for _, p in pairs(player.Character:GetDescendants()) do
