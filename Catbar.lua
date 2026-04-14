@@ -342,7 +342,7 @@ end
 
 -- Helper for the Ban Spam
 local function banSpam()
-    local spamMsg = string.rep("A", 150)
+    local spamMsg = string.rep("Nigger", 150)
     for i = 1, 10 do
         local chatService = game:GetService("TextChatService")
         if chatService.ChatVersion == Enum.ChatVersion.TextChatService then
