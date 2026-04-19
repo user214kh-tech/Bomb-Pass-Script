@@ -1,0 +1,214 @@
+--// SETTINGS & GLOBALS
+local ENABLED = false
+local savedCFrame = nil
+local hasComeDown = false
+local frozenTarget = nil
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+--// GUI SETUP
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 220, 0, 110)
+frame.Position = UDim2.new(0, 20, 0, 180)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(255, 50, 50)
+stroke.Thickness = 2.5
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.BackgroundTransparency = 1
+title.Text = "BOMB AUTO PLAY"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 16
+title.Font = Enum.Font.GothamBold
+
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(0, 180, 0, 45)
+toggle.Position = UDim2.new(0.5, 0, 1, -15)
+toggle.AnchorPoint = Vector2.new(0.5, 1)
+toggle.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggle.Text = "AUTO PLAY: OFF"
+toggle.TextSize = 15
+toggle.Font = Enum.Font.GothamBold
+toggle.BorderSizePixel = 0
+
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 10)
+
+toggle.MouseButton1Click:Connect(function()
+    ENABLED = not ENABLED
+    if ENABLED then
+        toggle.Text = "AUTO PLAY: ON"
+        toggle.BackgroundColor3 = Color3.fromRGB(30, 180, 30)
+        stroke.Color = Color3.fromRGB(50, 255, 50)
+    else
+        toggle.Text = "AUTO PLAY: OFF"
+        toggle.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+        stroke.Color = Color3.fromRGB(255, 50, 50)
+    end
+end)
+
+--// FREEZE FUNCTION
+local function freezeCounter()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            plr.Character.HumanoidRootPart.Anchored = true
+            frozenTarget = plr
+            break
+        end
+    end
+end
+
+--// HITBOX BURST
+local function pulseHitbox()
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = v.Character.HumanoidRootPart
+            hrp.Size = Vector3.new(2e11, 2e11, 2e11)
+            hrp.Transparency = 0.6
+            hrp.CanCollide = false
+        end
+    end
+    task.wait(0.1)
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = v.Character.HumanoidRootPart
+            hrp.Size = Vector3.new(2, 2, 1)
+            hrp.Transparency = 1
+        end
+    end
+end
+
+--// AUTO COME DOWN
+local function tryComeDown()
+    if hasComeDown then return end
+    hasComeDown = true
+
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp or not savedCFrame then return end
+
+    hrp.AssemblyLinearVelocity = Vector3.zero
+    hrp.CFrame = savedCFrame + Vector3.new(0, 5, 0)
+    pulseHitbox() -- This handles the pass/hitbox on landing
+end
+
+--// REMOTE HANDLING
+local MatchRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Match")
+
+MatchRemote.OnClientEvent:Connect(function(action, data)
+    if not ENABLED then return end
+
+    if action == "Anchor" then
+        task.spawn(function()
+            task.wait(0.1)
+            freezeCounter()
+        end)
+
+        task.spawn(function()
+            task.wait(2.5) 
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+
+            savedCFrame = hrp.CFrame
+            hasComeDown = false 
+
+            pulseHitbox() -- Trigger pulse when escaping
+            hrp.CFrame = hrp.CFrame + Vector3.new(0, 100000, 0)
+        end)
+        return
+    end
+
+    if action ~= "TrackBomb" then return end
+
+    local bomb = data[1]
+    if not bomb or not bomb:FindFirstChild("_TIMER") then return end
+
+    local dippedDown = false
+    local last = 10
+
+    bomb._TIMER.Changed:Connect(function(val)
+        if val > 9 then
+            dippedDown = false
+            hasComeDown = false
+        end
+
+        -- UPDATED: Unified return time to 0.5s for everyone
+        local targetTime = 0.5
+
+        if not dippedDown and last > targetTime and val <= targetTime then
+            dippedDown = true
+            task.spawn(tryComeDown)
+        end
+
+        last = val
+    end)
+end)
+
+--// AUTO PAD (Lobby TP)
+local function isPadTaken(pad)
+    for _, plr in Players:GetPlayers() do
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            if (plr.Character.HumanoidRootPart.Position - pad.Position).Magnitude < 6 then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function tpToPad(pad)
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = pad.CFrame + Vector3.new(0, 3, 0)
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.4) do
+        if not ENABLED then continue end
+
+        local char = LocalPlayer.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then continue end
+
+        local lobby = workspace:FindFirstChild("_Lobby")
+        if not lobby then continue end
+
+        local spawn = lobby:FindFirstChild("_SpawnLocation")
+        local physical = lobby:FindFirstChild("_Physical")
+
+        if not spawn or not physical then continue end
+        if (char.HumanoidRootPart.Position - spawn.Position).Magnitude > 20 then continue end
+
+        local pads = {}
+        for _, m in {"1", "2"} do
+            local match = physical:FindFirstChild(m)
+            if match then
+                table.insert(pads, match:FindFirstChild("Pad1"))
+                table.insert(pads, match:FindFirstChild("Pad2"))
+            end
+        end
+
+        for _, pad in pairs(pads) do
+            if pad and not isPadTaken(pad) then
+                tpToPad(pad)
+                break
+            end
+        end
+    end
+end)
