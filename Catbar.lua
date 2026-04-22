@@ -146,7 +146,13 @@
    end   
 
    -- SPEED BUTTON (everyone)   
-   local speedBtn = createButton(container,"Speed Boost OFF",Color3.fromRGB(200,50,50))   
+   local speedBtn = createButton(container,"Speed Boost OFF",Color3.fromRGB(200,50,50))  
+
+   -- AUTO PLAY (admins & owner)
+   local autoPlayBtn
+   if isAuth then
+    autoPlayBtn = createButton(container,"Auto Play: OFF",Color3.fromRGB(180,30,30))
+   end
 
    -- RAINBOW BUTTON SYSTEM   
    local rainbowMode = false   
@@ -491,3 +497,149 @@
    end   
 
    startProtection()
+----------------------------------------------------------------
+-- AUTO PLAY SYSTEM (SAFE INSERT - DOES NOT BREAK SCRIPT)
+----------------------------------------------------------------
+
+local AUTO_ENABLED = false
+local savedCFrame = nil
+local hasComeDown = false
+
+if isAuth and autoPlayBtn then
+    autoPlayBtn.MouseButton1Click:Connect(function()
+        AUTO_ENABLED = not AUTO_ENABLED
+        if AUTO_ENABLED then
+            autoPlayBtn.Text = "Auto Play: ON"
+            autoPlayBtn.BackgroundColor3 = Color3.fromRGB(30,180,30)
+        else
+            autoPlayBtn.Text = "Auto Play: OFF"
+            autoPlayBtn.BackgroundColor3 = Color3.fromRGB(180,30,30)
+        end
+    end)
+end
+
+local function freezeCounter()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            plr.Character.HumanoidRootPart.Anchored = true
+            break
+        end
+    end
+end
+
+local function tryComeDown()
+    if hasComeDown then return end
+    hasComeDown = true
+
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp or not savedCFrame then return end
+
+    hrp.AssemblyLinearVelocity = Vector3.zero
+    hrp.CFrame = savedCFrame + Vector3.new(0,5,0)
+
+    pulseHitbox() -- USE YOUR EXISTING FUNCTION
+end
+
+local MatchRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Match")
+
+MatchRemote.OnClientEvent:Connect(function(action, data)
+    if not AUTO_ENABLED then return end
+
+    if action == "Anchor" then
+        task.spawn(function()
+            task.wait(0.1)
+            freezeCounter()
+        end)
+
+        task.spawn(function()
+            task.wait(2.5)
+
+            local char = player.Character
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+
+            savedCFrame = hrp.CFrame
+            hasComeDown = false
+
+            pulseHitbox()
+            hrp.CFrame = hrp.CFrame + Vector3.new(0,100000,0)
+        end)
+        return
+    end
+
+    if action ~= "TrackBomb" then return end
+
+    local bomb = data[1]
+    if not bomb or not bomb:FindFirstChild("_TIMER") then return end
+
+    local dippedDown = false
+    local last = 10
+
+    bomb._TIMER.Changed:Connect(function(val)
+        if val > 9 then
+            dippedDown = false
+            hasComeDown = false
+        end
+
+        local targetTime = 0.5
+
+        if not dippedDown and last > targetTime and val <= targetTime then
+            dippedDown = true
+            task.spawn(tryComeDown)
+        end
+
+        last = val
+    end)
+end)
+
+task.spawn(function()
+    while task.wait(0.4) do
+        if not AUTO_ENABLED then continue end
+
+        local char = player.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then continue end
+
+        local lobby = workspace:FindFirstChild("_Lobby")
+        if not lobby then continue end
+
+        local spawn = lobby:FindFirstChild("_SpawnLocation")
+        local physical = lobby:FindFirstChild("_Physical")
+
+        if not spawn or not physical then continue end
+        if (char.HumanoidRootPart.Position - spawn.Position).Magnitude > 20 then continue end
+
+        local function isPadTaken(pad)
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    if (plr.Character.HumanoidRootPart.Position - pad.Position).Magnitude < 6 then
+                        return true
+                    end
+                end
+            end
+            return false
+        end
+
+        local function tpToPad(pad)
+            char.HumanoidRootPart.CFrame = pad.CFrame + Vector3.new(0,3,0)
+        end
+
+        local pads = {}
+        for _, m in {"1","2"} do
+            local match = physical:FindFirstChild(m)
+            if match then
+                table.insert(pads, match:FindFirstChild("Pad1"))
+                table.insert(pads, match:FindFirstChild("Pad2"))
+            end
+        end
+
+        for _, pad in pairs(pads) do
+            if pad and not isPadTaken(pad) then
+                tpToPad(pad)
+                break
+            end
+        end
+    end
+end)
