@@ -1,4 +1,10 @@
--- OWNER + ADMIN (ENCODED TO PREVENT TAMPERING)   
+-- SERVICES   
+   local Players = game:GetService("Players")   
+   local RS = game:GetService("RunService")   
+   local UIS = game:GetService("UserInputService")   
+   local player = Players.LocalPlayer   
+
+  -- OWNER + ADMIN (ENCODED TO PREVENT TAMPERING)   
 local _O = string.char(85, 115, 101, 114, 95, 75, 86, 72) -- "User_KVH"   
 local _A1 = string.char(74, 97, 51, 49, 52, 52, 53)      -- "Ja31445"   
 local _A2 = string.char(118, 117, 107, 105, 115, 98, 101, 115, 116, 54) -- "vukisbest6"   
