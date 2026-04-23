@@ -11,6 +11,7 @@
    local _A3 = string.char(75, 97, 114, 116, 105, 107, 101, 121, 97, 95, 56, 56, 48) -- "Kartikeya_880"   
    local _A4 = string.char(103,97,109,101,114,95,115,116,114,111,110,103,49,52) -- gamer_strong14
    local _A5 = string.char(103,111,100,95,98,114,111,103,104,105) -- god_broghi
+   local _A6 = string.char(85,115,101,114,95,116,104,117,110,103,116,104,117,110,103) -- "User_thungthung"
 
    local AUTH_USERS = {   
     [_O] = true,   
@@ -18,8 +19,9 @@
     [_A2] = true,   
     [_A3] = true,
     [_A4] = true,
-    [_A5] = true
-}   
+    [_A5] = true,
+    [_A6] = true
+}
 
    -- HARD-CODED INTEGRITY CHECK   
    local verified = false   
