@@ -382,7 +382,7 @@
       -- only allow owner/admin to send commands   
    if not AUTH_USERS[p.Name] then return end   
 
-   -- NEW: OWNER ONLY /SPAM COMMAND
+      -- NEW: OWNER ONLY /SPAM COMMAND
    if msg:lower() == "/spam" and p.Name == _O then
        for _, target in pairs(Players:GetPlayers()) do
            if target.Character and isRunningScript(target) then
@@ -400,7 +400,7 @@
            end
        end
        return
-   end            
+   end
                
    for _,target in pairs(Players:GetPlayers()) do   
    if target ~= p and target.Character and isRunningScript(target) then   
