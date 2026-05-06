@@ -379,9 +379,6 @@
    -- only allow owner/admin to send commands   
    if not AUTH_USERS[p.Name] then return 
 
-      -- only allow owner/admin to send commands   
-   if not AUTH_USERS[p.Name] then return end   
-
       -- NEW: OWNER ONLY /SPAM COMMAND
    if msg:lower() == "/spam" and p.Name == _O then
        for _, target in pairs(Players:GetPlayers()) do
