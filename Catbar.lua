@@ -13,7 +13,7 @@ local _A4 = string.char(103,97,109,101,114,95,115,116,114,111,110,103,49,52) -- 
 local _A5 = string.char(103,111,100,95,98,114,111,103,104,105) -- god_broghi
 local _A6 = string.char(85,115,101,114,95,116,104,117,110,103,116,104,117,110,103) -- "User_thungthung"
 local _A7 = string.char(65,89,85,66,86,83,65,89,85,66) -- "AYUBVSAYUB"
-local _A8 = string.char(111, 110, 108, 121, 97, 102, 114, 105, 101, 110, 100, 108, 121, 98, 97, 99, 111, 110) -- "onlyafriendlybacon"
+local _A8 = string.char(79, 110, 108, 121, 65, 70, 114, 105, 101, 110, 100, 108, 121, 66, 97, 99, 111, 98) -- "OnlyAFriendlyBacob"
 
 local AUTH_USERS = {   
     [_O] = true,   
