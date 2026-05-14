@@ -28,7 +28,7 @@ local AUTH_USERS = {
     [_A7] = true,
     [_A8] = true,
     [_A9] = true,
-    [_A7] = true
+    [_A10] = true
 }
 
 
